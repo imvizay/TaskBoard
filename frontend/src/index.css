@@ -1,0 +1,123 @@
+@import "tailwindcss";
+
+:root {
+
+  /* BACKGROUND   */
+
+  --bg-page: #f8fafc;
+  --bg-surface: #ffffff;
+  --bg-surface-hover: #f5f7fb;
+  --bg-elevated: #ffffff;
+  --bg-muted: #f1f5f9;
+  --bg-overlay: rgba(15, 23, 42, 0.45);
+
+  /* TEXT   */
+
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #64748b;
+  --text-placeholder: #94a3b8;
+  --text-inverse: #ffffff;
+
+  /* BRAND   */
+
+  --brand: #2563eb;
+  --brand-hover: #1d4ed8;
+  --brand-light: #dbeafe;
+  --brand-soft: #eff6ff;
+
+  /* BORDER   */
+
+  --border: #e2e8f0;
+  --border-light: #edf2f7;
+  --border-strong: #cbd5e1;
+  --border-focus: #2563eb;
+
+  /* STATUS   */
+
+  --success: #16a34a;
+  --success-soft: #dcfce7;
+
+  --warning: #d97706;
+  --warning-soft: #fef3c7;
+
+  --danger: #dc2626;
+  --danger-soft: #fee2e2;
+
+  --info: #2563eb;
+  --info-soft: #dbeafe;
+
+  /* PRIORITY   */
+
+  --priority-low: #16a34a;
+  --priority-medium: #d97706;
+  --priority-high: #dc2626;
+
+  /* TASK STATUS   */
+
+  --status-pending: #f59e0b;
+  --status-progress: #2563eb;
+  --status-completed: #16a34a;
+
+  /* SIDEBAR   */
+
+  --sidebar-bg: #ffffff;
+  --sidebar-border: #e5e7eb;
+  --sidebar-text: #334155;
+  --sidebar-active: #2563eb;
+  --sidebar-active-bg: #eff6ff;
+
+  /* CARD   */
+
+  --card-bg: #ffffff;
+  --card-border: #e5e7eb;
+  --card-hover: #f8fafc;
+
+  /* INPUT   */
+
+  --input-bg: #ffffff;
+  --input-border: #d1d5db;
+  --input-focus: #2563eb;
+  --input-placeholder: #94a3b8;
+
+  /* BUTTON   */
+
+  --button-primary: #2563eb;
+  --button-primary-hover: #1d4ed8;
+
+  --button-secondary: #ffffff;
+  --button-secondary-hover: #f8fafc;
+
+  --button-danger: #dc2626;
+  --button-danger-hover: #b91c1c;
+
+  /* ICON   */
+
+  --icon-primary: #334155;
+  --icon-secondary: #64748b;
+  --icon-muted: #94a3b8;
+
+  /* SHADOW   */
+
+  --shadow-sm: 0 1px 2px rgba(15,23,42,0.06);
+
+  --shadow-md: 0 4px 12px rgba(15,23,42,0.08);
+
+  --shadow-lg: 0 10px 25px rgba(15,23,42,0.12);
+
+  /* RADIUS   */
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+
+  /* SPACING */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+}
