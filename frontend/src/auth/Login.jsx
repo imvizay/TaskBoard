@@ -3,6 +3,8 @@ import { http } from "../settings/requests/requests"
 
 // tanstack query
 import { useMutation } from '@tanstack/react-query'
+import { useNavigate } from "react-router-dom"
+
 
 export default function LoginPage() {
 
@@ -12,10 +14,15 @@ export default function LoginPage() {
     })
 
     const [loginError,setLoginError] = useState({})  
+    const navigate = useNavigate()
 
     const loginMutation = useMutation({
         mutationKey:['user-login'],
-        mutationFn:(credential) => http.post("/login",credential),
+        mutationFn:(credential) => http.post("/login/",credential,{
+            headers:{
+                "Content-Type":"application/json"
+            }
+        }),
     })
 
     const credValidation = (loginCredential) => {
@@ -24,16 +31,16 @@ export default function LoginPage() {
             errors['emptyField'] = "missing field"
         }
 
-        else if(loginCredential.username.length < 4 || loginCredential.username > 16){
-            errors['username'] = "Username must be between 4-16 characters."
+        else if (loginCredential.username.length < 4 ||loginCredential.username.length > 16) {
+            errors.username = "Username must be between 4-16 characters.";
         }
 
-        else if(loginCredential.password.length < 6 || loginCredential.password > 8){
+        else if(loginCredential.password.length < 4 || loginCredential.password.length > 8){
             errors['password'] = 'Password must be between 4-16 characters.'
         }
 
         return {
-            "validation":Object.keys(errors).length > 0,
+            "validation":Object.keys(errors).length === 0,
             errors
         }
     }
@@ -61,6 +68,7 @@ export default function LoginPage() {
         try{
             const res = await loginMutation.mutateAsync(loginCredential)
             console.log("RESPONSE:",res)
+            navigate('/task-dashboard')
         }
 
         catch(error){
@@ -82,7 +90,7 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <form className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label
               htmlFor="identifier"
