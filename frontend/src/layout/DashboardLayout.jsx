@@ -3,6 +3,10 @@ import { useEffect, useState } from "react"
 import { Outlet } from "react-router-dom"
 import CreateTaskForm from "../components/form/CreateTaskForm"
 
+import { useQuery } from "@tanstack/react-query"
+import { http } from "../settings/requests/requests"
+
+
 function DashboardLayout() {
     
     const [publishTask,setPublishTask] = useState(false)
@@ -18,7 +22,20 @@ function DashboardLayout() {
 
     useEffect(()=>{
         console.log("User",user)
-    },[user])
+    },[publishTask])
+
+    // Get All tasks.
+
+    const {data:tasks = []} = useQuery({
+        queryKey:['tasks'],
+        queryFn: () => http.get('tasks/'),
+    })
+
+    
+
+    console.log('TASKS',tasks)
+
+
 
 
   return (
@@ -35,11 +52,11 @@ function DashboardLayout() {
 
           <div className="flex items-center gap-3">
 
-            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--brand-light)] font-semibold text-[var(--brand)]">VM</div>
+            <div className="flex h-11 w-11 items-center justify-center rounded-full bg-[var(--brand-light)] font-semibold text-[var(--brand)]">V</div>
 
             <div className="hidden sm:block">
-              <p className="text-sm font-medium text-[var(--text-primary)]">Vijay Meena</p>
-              <p className="text-xs text-[var(--text-muted)]">Administrator</p>
+              <p className="text-sm font-medium text-[var(--text-primary)]">{user?.username?.toUpperCase()}</p>
+              <p className="text-xs text-[var(--text-muted)]">{user.is_admin ? "Adminstrator":"User"}</p>
             </div>
 
           </div>
@@ -93,12 +110,12 @@ function DashboardLayout() {
       </section>
 
      <main>
-        
+
         {publishTask && (
             <CreateTaskForm onClose={() => setPublishTask(false)} />
         )}
 
-        <Outlet/>
+        <Outlet context={tasks}/>
      </main>
 
     </div>

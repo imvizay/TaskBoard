@@ -10,6 +10,8 @@ class TaskViewSerializer(ModelSerializer):
     class Meta:
         model = Task
         fields = [
+            "id",
+            "task_code",
             'task_name',
             'task_priority',
             'task_status',
@@ -18,6 +20,11 @@ class TaskViewSerializer(ModelSerializer):
             'due_date',
             'position'
         ]
+        extra_kwargs = {
+            "id":{"read_only":True},
+            "task_code":{"read_only":True},
+            "position":{"write_only":True}
+        }
 
     def validate(self, attrs):
         error = {}
@@ -48,7 +55,7 @@ class TaskViewSerializer(ModelSerializer):
 
     def create(self, validated_data):
         last_position = (
-            Task.objects.aaggregate(max_position=Max("position"))['max_position']
+            Task.objects.aggregate(max_position=Max("position"))['max_position']
         )
 
         validated_data["position"] = (

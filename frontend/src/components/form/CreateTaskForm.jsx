@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { useMutation } from "@tanstack/react-query"
+import { useMutation,useQuery,useQueryClient } from "@tanstack/react-query"
 import { http } from "../../settings/requests/requests"
 
 function CreateTaskForm({ onClose }) {
@@ -13,7 +13,7 @@ function CreateTaskForm({ onClose }) {
     task_image: null,
   })
 
-
+  const queryCleint = useQueryClient()
 
   const [taskError,setTaskError] = useState({})
 
@@ -23,7 +23,13 @@ function CreateTaskForm({ onClose }) {
         headers:{
             "Content-Type":'multipart/form-data'
         }
-    })
+    }),
+    onSuccess:() => {
+        queryCleint.invalidateQueries({
+            queryKey:['tasks']
+        }),
+        onClose()
+    }
   })
 
   const handleChange = (e) => {
@@ -102,6 +108,7 @@ function CreateTaskForm({ onClose }) {
     try{
         const result = await taskMutation.mutateAsync(formData)
         console.log("RESULT RESPONSE",result.data)
+        onClose()
     }
     catch(error){
         console.log("ERROR:",error)
@@ -240,7 +247,7 @@ function CreateTaskForm({ onClose }) {
 
                 <textarea
                   rows={6}
-                  name="description"
+                  name="task_description"
                   value={task.task_description}
                   onChange={handleChange}
                   placeholder="Write a short description..."

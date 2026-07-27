@@ -2,9 +2,9 @@ import { api } from "../axios/setup";
 
 const http = {
     get:(url,config={}) => api.get(url,config),
-    post: (url,config={}) => api.post(url,config={}),
-    put: (url,config={}) => api.put(url,config={}),
-    patch: (url,config={}) => api.patch(url,config={}),
+    post: (url,data={},config={}) => api.post(url,data,config={}),
+    put: (url,data={},config={}) => api.put(url,data,config={}),
+    patch: (url,data={},config={}) => api.patch(url,data,config={}),
     delete: (url,config={}) => api.delete(url,config={}),  
 }
 
