@@ -21,11 +21,15 @@ from django.conf import settings
 from django.conf.urls.static import static
 from app import views
 
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/login/',views.login_view),
    
     path('api/',include('app.routers')),
+    path('api/tasks/export/pdf/',views.ExportPDFView.as_view()),
+    path("api/tasks/export/excel/",views.ExportExcelView.as_view())
+
 
 ]
 

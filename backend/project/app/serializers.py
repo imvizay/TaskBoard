@@ -6,6 +6,7 @@ from datetime import date
 from django.db.models import Max
 
 class TaskViewSerializer(ModelSerializer):
+    task_image = serializers.SerializerMethodField()
     position  = serializers.IntegerField(required=False)
     class Meta:
         model = Task
@@ -63,6 +64,16 @@ class TaskViewSerializer(ModelSerializer):
         )
 
         return Task.objects.create(**validated_data)
+
+    def get_task_image(self,obj):
+
+        request = self.context.get("request")
+
+        if obj.task_image:
+            return request.build_absolute_uri(obj.task_image.url)
+
+        return None
+        
 
 
 

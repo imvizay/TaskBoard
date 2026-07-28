@@ -12,13 +12,12 @@ function SortableTaskCard(props) {
     }
 
   return (
-    <div 
-    ref={setNodeRef}
-    style={style}
-    {...attributes}
-    {...listeners}
-    >
-        <TaskCard {...props}/>
+   <div ref={setNodeRef} style={style}>
+      <TaskCard
+          {...props}
+          dragListeners={listeners}
+          dragAttributes={attributes}
+      />
     </div>
   )
 }

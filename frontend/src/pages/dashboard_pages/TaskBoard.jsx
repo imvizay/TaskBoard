@@ -1,28 +1,33 @@
-import React,{useState,useEffect,useRef, useMemo} from "react"
+import React,{useState,useEffect,useRef, useMemo, useCallback} from "react"
 import TaskCard from "../../components/card/TaskCard"
 import { useOutletContext } from "react-router-dom"
 
-// drag and drop
+import { useQuery,useQueryClient } from "@tanstack/react-query"
+
+// DRAG N DROP.
 import { DndContext,closestCenter } from '@dnd-kit/core'
 import { SortableContext,verticalListSortingStrategy,arrayMove } from '@dnd-kit/sortable'
 import SortableTaskCard from "../../components/card/SortableTaskCard"
 
-// mutation fn
+// MUTATION FN.
 import { useMutation } from "@tanstack/react-query"
 import { http } from "../../settings/requests/requests"
+import EditTask from "../../components/form/EditTask"
 
 function TaskBoard() {
-   
-    const tasks = useOutletContext() || []
-
+  
     const [openMenuId,setOpenMenuId] = useState(null)
+    const [selectedTask,setSelectedTask] = useState(null)
+    const [openEditTask,setOpenEditTask] = useState(false)
     
     const [pendingTasks, setPendingTasks] = useState([])
     const [inProgressTasks, setInProgressTasks] = useState([])
     const [completedTasks, setCompletedTasks] = useState([])
 
     const saveTimeout = useRef(null)
+    const tasks = useOutletContext() ?? []
 
+    const queryClient = useQueryClient()
 
     useEffect(() => {
       console.log("tasks changes everytime")
@@ -43,11 +48,34 @@ function TaskBoard() {
         )
     }, [tasks])
 
+    const deleteMutation = useMutation({
+      mutationKey:['delete-task'],
+      mutationFn:(id)=>http.delete(`tasks/${id}/`),
+      onSuccess:()=>{
+        queryClient.invalidateQueries({
+          queryKey:['tasks']
+        })
+      }
+    })
+
+    // Edit task
+    const handleEditTask = (task) => {
+      console.log("Handle Edit Task Working",task)
+      setSelectedTask(task)
+      setOpenEditTask(true)
+    }
+
+    // Delete task
+    const handleDeleteTask = (id) => {
+      deleteMutation.mutate(id)
+      setOpenMenuId(false)
+    }
 
     const reorderedMutation = useMutation({
         mutationKey:["reorder-mutation"],
         mutationFn:(positions)=>http.patch('/tasks/reorder/',positions)
     })
+
 
     const handleDragEnd = (event) => {
 
@@ -86,7 +114,6 @@ function TaskBoard() {
     }
     
 
-
   return (
     <section className="min-h-screen bg-[var(--bg-page)] p-8">
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
@@ -115,6 +142,8 @@ function TaskBoard() {
                           task={task}
                           openMenuId={openMenuId}
                           setOpenMenuId={setOpenMenuId}
+                          handleEditTask={handleEditTask}
+                          handleDeleteTask = {handleDeleteTask}
                       />
                   )): 
 
@@ -153,6 +182,7 @@ function TaskBoard() {
                 task={task} 
                 openMenuId={openMenuId}
                 setOpenMenuId={setOpenMenuId}
+                
                 />
             )): 
 
@@ -187,6 +217,7 @@ function TaskBoard() {
                     task={task}
                     openMenuId={openMenuId}
                     setOpenMenuId={setOpenMenuId}
+                    
                 />
             )): 
 
@@ -202,8 +233,16 @@ function TaskBoard() {
           </div>
         </div>
       </div>
+      {openEditTask && (
+        <EditTask 
+        task={selectedTask}
+        onClose={()=>setOpenEditTask(false)}
+        />
+      )}
     </section>
   )
 }
 
 export default TaskBoard
+
+

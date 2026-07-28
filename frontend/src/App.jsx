@@ -8,6 +8,7 @@ import {Routes,Route} from 'react-router-dom'
 import DashboardLayout from './layout/DashboardLayout'
 import ProtectedDashboardRoute from './protected_route/ProtectedDashboardRoute'
 import TaskBoard from './pages/dashboard_pages/TaskBoard'
+import CreateTaskForm from './components/form/CreateTaskForm'
 
 function App() {
   return (
@@ -27,8 +28,7 @@ function App() {
         </ProtectedDashboardRoute>}>
 
         <Route index element = {<TaskBoard/>} />
-
-        
+        <Route path='task-edit/:id'/>
 
       </Route>
 
