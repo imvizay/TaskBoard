@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react"
 import { Outlet } from "react-router-dom"
 import CreateTaskForm from "../components/form/CreateTaskForm"
-
+import { ChevronDown, Download, FileText, Rows3 } from "lucide-react"
 import { useQuery } from "@tanstack/react-query"
 import { http } from "../settings/requests/requests"
 
@@ -11,6 +11,7 @@ function DashboardLayout() {
     
     const [publishTask,setPublishTask] = useState(false)
     const [user,setUser] = useState({})
+    const [openExport, setOpenExport] = useState(false)
   
     useEffect(()=>{
         const user  = JSON.parse(localStorage.getItem("taskboard_user"))
@@ -41,7 +42,37 @@ function DashboardLayout() {
         retry: false,
     })
 
-    console.log('TASKS',tasks)
+    // DOWNLOADS
+    const handleDownloadPDF = async () => {
+        const response = await http.get("/tasks/export/pdf/",{
+          responseType:"blob"
+        })
+        const url = URL.createObjectURL(response.data)
+
+        const a = document.createElement('a')
+        a.href = url
+        a.download = 'tasks.pdf'
+        a.click()
+        URL.revokeObjectURL(url)
+    }
+
+    // HANDLE DOWNLAOD EXCEL
+    const handleDownloadExcel = async () => {
+        const response = await http.get("/tasks/export/excel/",
+            {
+                responseType: "blob",
+            }
+        )
+      
+        const url = window.URL.createObjectURL(response.data)
+        const a = document.createElement("a")
+      
+        a.href = url
+        a.download = "tasks.xlsx"
+        a.click()
+      
+        window.URL.revokeObjectURL(url)
+    }
 
   return (
     <div className="min-h-screen bg-[var(--bg-page)]">
@@ -103,13 +134,55 @@ function DashboardLayout() {
             </select>
           </div>
         
-          {user.is_admin && (
-            <button
-            onClick={()=>setPublishTask(true)}
-            className="rounded-[var(--radius-md)] bg-[var(--button-primary)] px-5 py-3 text-sm font-medium text-white transition hover:bg-[var(--button-primary-hover)]">
-              Create Task
-            </button>
-          )}
+         {user.is_admin && (
+           <div className="flex items-center gap-2">
+           
+             <div className="relative">
+                 
+               <button
+                 onClick={() => setOpenExport((prev) => !prev)}
+                 className="flex items-center gap-2 rounded-md border border-[var(--border)] bg-white px-4 py-2 text-sm hover:bg-gray-50"
+               >
+                 <Download size={16} />
+                 Export
+                 <ChevronDown
+                   size={15}
+                   className={`transition-transform ${
+                     openExport ? "rotate-180" : ""
+                   }`}
+                 />
+               </button>
+                 
+               {openExport && (
+                 <div className="absolute right-0 mt-2 w-52 overflow-hidden rounded-lg border border-[var(--border)] bg-white shadow-lg">
+                 
+                   <button
+                     onClick={handleDownloadPDF}
+                     className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm hover:bg-gray-100"
+                   >
+                     <FileText/> Download as PDF
+                   </button>
+               
+                   <button
+                     onClick={handleDownloadExcel}
+                     className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm hover:bg-gray-100"
+                   >
+                     <Rows3/> Download as Excel
+                   </button>
+               
+                 </div>
+               )}
+             </div>
+
+                <button
+                  onClick={() => setPublishTask(true)}
+                  className="rounded-md bg-[var(--button-primary)] px-4 py-2 text-sm font-medium text-white transition hover:bg-[var(--button-primary-hover)]"
+                >
+                  Create Task
+                </button>
+
+              </div>
+            )}
         </div>
 
       </section>
