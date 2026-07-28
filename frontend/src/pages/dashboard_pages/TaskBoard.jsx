@@ -1,24 +1,31 @@
-import React,{useState,useEffect} from "react";
+import React,{useState,useEffect,useRef, useMemo} from "react"
 import TaskCard from "../../components/card/TaskCard"
-import { useOutletContext } from "react-router-dom";
+import { useOutletContext } from "react-router-dom"
 
 // drag and drop
-import { DndContext } from '@dnd-kit/core'
-import { SortableContext } from '@dnd-kit/sortable'
-import SortableTaskCard from "../../components/card/SortableTaskCard";
+import { DndContext,closestCenter } from '@dnd-kit/core'
+import { SortableContext,verticalListSortingStrategy,arrayMove } from '@dnd-kit/sortable'
+import SortableTaskCard from "../../components/card/SortableTaskCard"
+
+// mutation fn
+import { useMutation } from "@tanstack/react-query"
+import { http } from "../../settings/requests/requests"
 
 function TaskBoard() {
    
-    const tasks = useOutletContext().data || []
+    const tasks = useOutletContext() || []
 
     const [openMenuId,setOpenMenuId] = useState(null)
     
-    const [pendingTasks, setPendingTasks] = useState([]);
-    const [inProgressTasks, setInProgressTasks] = useState([]);
-    const [completedTasks, setCompletedTasks] = useState([]);
+    const [pendingTasks, setPendingTasks] = useState([])
+    const [inProgressTasks, setInProgressTasks] = useState([])
+    const [completedTasks, setCompletedTasks] = useState([])
+
+    const saveTimeout = useRef(null)
 
 
     useEffect(() => {
+      console.log("tasks changes everytime")
         setPendingTasks(
             tasks
                 .filter(task => task.task_status === "pending")
@@ -35,6 +42,48 @@ function TaskBoard() {
                 .sort((a, b) => a.position - b.position)
         )
     }, [tasks])
+
+
+    const reorderedMutation = useMutation({
+        mutationKey:["reorder-mutation"],
+        mutationFn:(positions)=>http.patch('/tasks/reorder/',positions)
+    })
+
+    const handleDragEnd = (event) => {
+
+        const { active, over } = event
+
+        if (!over) return
+
+        if (active.id === over.id) return
+
+        setPendingTasks((tasks) => {
+
+            const oldIndex = tasks.findIndex(
+                task => task.id === active.id
+            )
+
+            const newIndex = tasks.findIndex(
+                task => task.id === over.id
+            )
+
+            const reordered = arrayMove(tasks, oldIndex, newIndex)
+
+            clearTimeout(saveTimeout.current)
+
+            saveTimeout.current = setTimeout(() => {
+                const positions = reordered.map((task,index)=>({
+                    id:task.id,
+                    position:index + 1
+                }))
+
+                reorderedMutation.mutate(positions)
+
+            }, 2000);
+
+            return reordered
+        })
+    }
     
 
 
@@ -53,9 +102,12 @@ function TaskBoard() {
             </span>
           </div>
 
-         <DndContext>
+         <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
 
-            <SortableContext items={pendingTasks.map(task=>task.id)}>
+            <SortableContext 
+                items={pendingTasks.map(task=>task.id)} 
+                strategy={verticalListSortingStrategy}
+            >
                 <div className="space-y-4">
                   {pendingTasks.length > 0 ? pendingTasks.map((task)=>(
                       <SortableTaskCard
@@ -151,7 +203,7 @@ function TaskBoard() {
         </div>
       </div>
     </section>
-  );
+  )
 }
 
-export default TaskBoard;
+export default TaskBoard

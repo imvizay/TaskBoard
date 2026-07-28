@@ -58,6 +58,12 @@ CORS_ALLOWED_ORIGINS = [
 ]
 
 
+# AUTHENTICATION
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "rest_framework.authentication.BasicAuthentication",
+    ]
+}
 
 ROOT_URLCONF = 'project.urls'
 
