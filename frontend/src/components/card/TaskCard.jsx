@@ -9,9 +9,9 @@ const priorityColor = {
   }
 
 function TaskCard({task,openMenuId,setOpenMenuId}) {
+
     const {user} = useUser()
-    console.log("OPEN 1:",openMenuId)
-    console.log("OPEN 2:",setOpenMenuId)
+  
   
 
   return (
@@ -29,7 +29,9 @@ function TaskCard({task,openMenuId,setOpenMenuId}) {
           </p>
         </div>
 
-        <button onClick={ () => setOpenMenuId(openMenuId == task.id ? null : task.id)} className="rounded p-1 text-[var(--text-secondary)] hover:bg-gray-100">
+        <button
+          onPointerDown={(e) => e.stopPropagation()} 
+          onClick={ () => setOpenMenuId(openMenuId == task.id ? null : task.id)} className="rounded p-1 text-[var(--text-secondary)] hover:bg-gray-100">
           <MoreVertical size={16} />
         </button>
         {openMenuId == task.id && <MenuOption user={user}/>}

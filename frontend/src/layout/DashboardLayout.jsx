@@ -28,15 +28,20 @@ function DashboardLayout() {
 
     const {data:tasks = []} = useQuery({
         queryKey:['tasks'],
-        queryFn: () => http.get('tasks/'),
+        queryFn: async () => {
+          console.log("fetching tasks...")
+          const res = await http.get('tasks/',{
+            auth:{
+              username:"vijay",
+              password:"admin" 
+            }
+          })
+          return res.data
+        },
+        retry: false,
     })
 
-    
-
     console.log('TASKS',tasks)
-
-
-
 
   return (
     <div className="min-h-screen bg-[var(--bg-page)]">
