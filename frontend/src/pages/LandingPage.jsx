@@ -23,7 +23,7 @@ function LandingPage() {
             Login
           </button>
 
-          <button className="w-full rounded-lg border border-slate-300 bg-white px-8 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-100 sm:w-auto">
+          <button onClick={() => navigate('/register')} className="w-full rounded-lg border border-slate-300 bg-white px-8 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-100 sm:w-auto">
             Sign Up
           </button>
         </div>
