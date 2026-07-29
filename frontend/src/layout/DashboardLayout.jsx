@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Outlet } from "react-router-dom"
 import CreateTaskForm from "../components/form/CreateTaskForm"
 import { ChevronDown, Download, FileText, Rows3 } from "lucide-react"
@@ -12,6 +12,10 @@ function DashboardLayout() {
     const [publishTask,setPublishTask] = useState(false)
     const [user,setUser] = useState({})
     const [openExport, setOpenExport] = useState(false)
+
+    const [searchQuery,setSearchQuery] = useState("")
+    const [priorityFilter, setPriorityFilter] = useState("");
+    const [statusFilter, setStatusFilter] = useState("");
   
     useEffect(()=>{
         const user  = JSON.parse(localStorage.getItem("taskboard_user"))
@@ -21,26 +25,52 @@ function DashboardLayout() {
         setUser(user)
     },[])
 
-    useEffect(()=>{
-        console.log("User",user)
-    },[publishTask])
 
     // Get All tasks.
-
     const {data:tasks = []} = useQuery({
         queryKey:['tasks'],
         queryFn: async () => {
           console.log("fetching tasks...")
-          const res = await http.get('tasks/',{
-            auth:{
-              username:"vijay",
-              password:"admin" 
-            }
-          })
+          const res = await http.get('tasks/')
           return res.data
         },
         retry: false,
     })
+
+    // SEARCH & FILTERS
+    const tasksToDisplay = useMemo(() => {
+
+        // Search 
+        if (searchQuery.trim()) {
+            const query = searchQuery.toLowerCase();
+        
+            return tasks.filter(task =>
+                task.task_name.toLowerCase().includes(query) ||
+                task.task_code.toLowerCase().includes(query)
+            );
+        }
+      
+        // Priority filter
+        if (priorityFilter !== "") {
+            return tasks.filter(
+                task => task.task_priority === priorityFilter
+            );
+        }
+      
+        // Status filter
+        if (statusFilter !== "") {
+            return tasks.filter(
+                task => task.task_status === statusFilter
+            );
+        }
+      
+        return tasks;
+      
+    }, [tasks, searchQuery, priorityFilter, statusFilter]);
+    
+
+
+
 
     // DOWNLOADS
     const handleDownloadPDF = async () => {
@@ -109,22 +139,35 @@ function DashboardLayout() {
             {/* Search */}
             <input
               type="text"
+              value={searchQuery}
+              onChange={ (e) => setSearchQuery(e.target.value)}
               placeholder="Search tasks..."
               className="w-full rounded-[var(--radius-md)] border border-[var(--input-border)] bg-[var(--input-bg)] px-4 py-3 text-sm outline-none transition focus:border-[var(--border-focus)] sm:max-w-sm"
             />
         
             {/* Status Filter */}
             <select
+            value={statusFilter}
+            onChange={(e) => {
+                setStatusFilter(e.target.value);
+                setPriorityFilter("");
+            }}
+            
               className="rounded-[var(--radius-md)] border border-[var(--input-border)] bg-[var(--input-bg)] px-4 py-3 text-sm outline-none transition focus:border-[var(--border-focus)]"
             >
               <option value="">All Status</option>
-              <option value="todo">To Do</option>
-              <option value="in_progress">In Progress</option>
+              <option value="pending">To Do</option>
+              <option value="in-progress">In Progress</option>
               <option value="completed">Completed</option>
             </select>
         
             {/* Priority Filter */}
             <select
+            value={priorityFilter}
+              onChange={(e) => {
+                setPriorityFilter(e.target.value);
+                setStatusFilter("");
+              }}
               className="rounded-[var(--radius-md)] border border-[var(--input-border)] bg-[var(--input-bg)] px-4 py-3 text-sm outline-none transition focus:border-[var(--border-focus)]"
             >
               <option value="">All Priority</option>
@@ -193,7 +236,7 @@ function DashboardLayout() {
             <CreateTaskForm onClose={() => setPublishTask(false)} />
         )}
 
-        <Outlet context={tasks}/>
+        <Outlet context={tasksToDisplay}/>
      </main>
 
     </div>

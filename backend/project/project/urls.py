@@ -28,9 +28,9 @@ urlpatterns = [
    
     path('api/',include('app.routers')),
     path('api/tasks/export/pdf/',views.ExportPDFView.as_view()),
-    path("api/tasks/export/excel/",views.ExportExcelView.as_view())
-
-
+    path("api/tasks/export/excel/",views.ExportExcelView.as_view()),
+    path("api/user/tasks/",views.TaskStatusAPIView.as_view()),
+    path("api/tasks/comment/<int:pk>",views.add_comments)
 ]
 
 if settings.DEBUG:
