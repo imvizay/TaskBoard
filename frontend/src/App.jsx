@@ -9,6 +9,7 @@ import DashboardLayout from './layout/DashboardLayout'
 import ProtectedDashboardRoute from './protected_route/ProtectedDashboardRoute'
 import TaskBoard from './pages/dashboard_pages/TaskBoard'
 import CreateTaskForm from './components/form/CreateTaskForm'
+import SignupForm from './auth/Signup'
 
 function App() {
   return (
@@ -18,6 +19,8 @@ function App() {
       <Route path='/'>
         <Route index element = {<LandingPage/>}/>
         <Route path='/login' element={<LoginPage/>}/>
+        <Route path='/register' element={<SignupForm/>}/>
+
       </Route>
 
       <Route 
