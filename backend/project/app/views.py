@@ -7,6 +7,8 @@ from django.contrib.auth import authenticate,login
 from rest_framework.permissions import IsAuthenticated,IsAdminUser
 from django.shortcuts import get_object_or_404
 
+from django.contrib.auth.models import User
+from django.contrib.auth.hashers import make_password
 
 from .models import Task,TaskComment
 from .serializers import TaskViewSerializer,TaskCommentSerializer
@@ -14,6 +16,38 @@ from .serializers import TaskViewSerializer,TaskCommentSerializer
 
 
 # AUTHENTICATION
+
+@api_view(["POST"])
+def signup_view(request):
+
+    username = request.data.get("username")
+    password = request.data.get("password")
+
+    if not username or not password:
+        return Response(
+            {"message": "Username and password are required."},
+            status=400,
+        )
+
+    if User.objects.filter(username=username).exists():
+        return Response(
+            {"message": "Username already exists."},
+            status=400,
+        )
+
+    user = User.objects.create(
+        username=username,
+        password=make_password(password),  
+        is_staff=False,
+        is_superuser=False,
+    )
+
+    return Response({ 
+        "message": "Account created successfully."
+        },status=201)
+
+
+
 @api_view(['GET','POST'])
 def login_view(request):
     username =  request.data.get('username')
