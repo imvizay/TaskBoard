@@ -8,7 +8,7 @@ const priorityColor = {
   low: "bg-emerald-100 text-black",
 };
 
-function TaskCard({task,openMenuId,setOpenMenuId,dragListeners,dragAttributes,handleEditTask,handleDeleteTask}) {
+function TaskCard({task,openMenuId,setOpenMenuId,dragListeners,dragAttributes,handleEditTask,handleDeleteTask,handleChangeStatus,handleTaskDetail}) {
 
   const { user } = useUser();
   const navigate = useNavigate();
@@ -67,6 +67,9 @@ function TaskCard({task,openMenuId,setOpenMenuId,dragListeners,dragAttributes,ha
             onClose = { () => setOpenMenuId(null)}
             handleEditTask={() => handleEditTask(task)}
             handleDelete = {()=>handleDeleteTask(task.id)}
+            task={task}
+            handleChangeStatus={handleChangeStatus}
+            handleTaskDetail={handleTaskDetail}
         />
     )}
 
@@ -78,7 +81,9 @@ export default TaskCard;
 
 
 
-const MenuOption = ({user,handleEditTask,onClose,handleDelete}) => {
+const MenuOption = ({user,handleEditTask,onClose,handleDelete,task,handleChangeStatus,handleTaskDetail}) => {
+
+
     return (
         <div className="absolute right-0 top-10 z-50 w-52 overflow-hidden rounded-xl border border-[var(--border)] bg-white py-1 shadow-lg">
 
@@ -96,7 +101,7 @@ const MenuOption = ({user,handleEditTask,onClose,handleDelete}) => {
                     </button>
 
                     <button
-                        // onClick={handleViewDetails}
+                        onClick={ () => handleTaskDetail(task)}
                         className="w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100"
                     >
                         View Details
@@ -112,32 +117,30 @@ const MenuOption = ({user,handleEditTask,onClose,handleDelete}) => {
                     </button>
                 </>
             ) : (
-                <>
-                    <button
-                        // onClick={handleAddComment}
-                        className="w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100"
-                    >
-                        Add Comment
+                <>  
+                    <button  onClick={ () => handleTaskDetail(task)} className="w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100">
+                        View Details
                     </button>
 
                     <div className="my-1 border-t border-gray-200" />
 
                     <button
-                        // onClick={() => handleChangeStatus("pending")}
-                        className="w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100"
+                        onClick={() => handleChangeStatus(task.id,"pending")}
+                        disabled={task.task_status == "pending"}
+                        className={task.task_status == "pending" ?" bg-gray-100 text-gray-500 pointer-none w-full px-4 py-2.5 text-left text-sm" : "w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100"}
                     >
                         Mark as Pending
                     </button>
 
                     <button
-                        // onClick={() => handleChangeStatus("in-progress")}
+                        onClick={() => handleChangeStatus(task.id,"in-progress")}
                         className="w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100"
                     >
                         Mark as In Progress
                     </button>
 
                     <button
-                        // onClick={() => handleChangeStatus("completed")}
+                        onClick={() => handleChangeStatus(task.id,"completed")}
                         className="w-full px-4 py-2.5 text-left text-sm hover:bg-gray-100"
                     >
                         Mark as Completed

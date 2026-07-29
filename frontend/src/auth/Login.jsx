@@ -35,7 +35,7 @@ export default function LoginPage() {
             errors.username = "Username must be between 4-16 characters.";
         }
 
-        else if(loginCredential.password.length < 4 || loginCredential.password.length > 8){
+        else if(loginCredential.password.length < 4 || loginCredential.password.length > 16){
             errors['password'] = 'Password must be between 4-16 characters.'
         }
 
@@ -67,7 +67,9 @@ export default function LoginPage() {
         setLoginError({})
         try{
             const res = await loginMutation.mutateAsync(loginCredential)
-            console.log("RESPONSE:",res)
+            const user = res.data.user
+            localStorage.setItem("taskboard_user",JSON.stringify(user))
+
             navigate('/task-dashboard')
         }
 

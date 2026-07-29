@@ -1,14 +1,16 @@
 from django.shortcuts import render
 from rest_framework.response import Response
-from rest_framework.decorators import api_view,action
+from rest_framework.decorators import api_view,action,permission_classes
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.views import APIView
 from django.contrib.auth import authenticate,login
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import IsAuthenticated,IsAdminUser
+from django.shortcuts import get_object_or_404
 
 
-from .models import Task
-from .serializers import TaskViewSerializer
+from .models import Task,TaskComment
+from .serializers import TaskViewSerializer,TaskCommentSerializer
+
 
 
 # AUTHENTICATION
@@ -43,15 +45,16 @@ def login_view(request):
 
 # ADMIN CRUD OPERATION ON TASK
 class TaskViewSet(ModelViewSet):
-    permission_classes = [IsAdminUser]
     queryset = Task.objects.all()
     serializer_class = TaskViewSerializer 
     
-    def list(self, request, *args, **kwargs):
-      print("User:", request.user)
-      print("Authenticated:", request.user.is_authenticated)
-      print("Is Staff:", getattr(request.user, "is_staff", None))
-      return super().list(request, *args, **kwargs)
+    def get_permissions(self):
+        if self.action in ["list", "retrieve"]:
+            permission_classes = [IsAuthenticated]
+        else:
+            permission_classes = [IsAdminUser]
+
+        return [permission() for permission in permission_classes]
 
     @action(detail=False,methods=["patch"],url_path="reorder")
     def reorder(self,request):
@@ -72,6 +75,47 @@ class TaskViewSet(ModelViewSet):
         return Response({
             "message":"Task order updated successfully."
         },status=200)
+
+
+
+# USER STATUS UPDATE
+class TaskStatusAPIView(APIView):
+
+    def patch(self, request):
+
+        task_id = request.query_params.get("id")
+        status = request.query_params.get("status")
+
+        task = Task.objects.get(id=task_id)
+
+        task.task_status = status
+        task.save()
+
+        return Response({"message": "Updated"})
+
+
+# ADD COMMENTS
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def add_comments(request,pk):
+
+    task = get_object_or_404(Task,pk=pk)
+    serializer = TaskCommentSerializer(data=request.data)
+
+    if serializer.is_valid():
+        
+        TaskComment.objects.create(    
+            task=task,
+            user=request.user,
+            comment=serializer.validated_data["comment"]
+        )
+        
+        return Response({
+            "message":"Comment added successfully."
+        },status=200)
+
+    return Response(serializer.errors,status=404)
+    
 
 
 #  EXPORT PDF/EXCEL

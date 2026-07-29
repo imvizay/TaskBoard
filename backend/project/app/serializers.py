@@ -1,13 +1,25 @@
 from rest_framework.serializers import ModelSerializer
 from rest_framework import serializers
-from .models import Task
+from .models import Task,TaskComment
 from datetime import date
 
 from django.db.models import Max
 
+class TaskCommentSerializer(ModelSerializer):
+
+    username = serializers.CharField(source="user.username",read_only=True)
+    user_id = serializers.IntegerField(source="user.id",read_only=True)
+    created_at = serializers.DateField(read_only=True)
+
+    class Meta:
+        model = TaskComment
+        fields = ["user_id","username","comment","created_at"]
+
+
 class TaskViewSerializer(ModelSerializer):
     task_image = serializers.SerializerMethodField()
     position  = serializers.IntegerField(required=False)
+    comments = TaskCommentSerializer(read_only=True,many=True)
     class Meta:
         model = Task
         fields = [
@@ -19,7 +31,8 @@ class TaskViewSerializer(ModelSerializer):
             'task_image',
             'task_description',
             'due_date',
-            'position'
+            'position',
+            "comments"
         ]
         extra_kwargs = {
             "id":{"read_only":True},

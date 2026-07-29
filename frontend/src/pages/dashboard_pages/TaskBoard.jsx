@@ -13,12 +13,16 @@ import SortableTaskCard from "../../components/card/SortableTaskCard"
 import { useMutation } from "@tanstack/react-query"
 import { http } from "../../settings/requests/requests"
 import EditTask from "../../components/form/EditTask"
+import TaskDetail from "./TaskDetails"
 
 function TaskBoard() {
   
     const [openMenuId,setOpenMenuId] = useState(null)
     const [selectedTask,setSelectedTask] = useState(null)
     const [openEditTask,setOpenEditTask] = useState(false)
+
+    const [openTaskDetail,setTaskDetailDialog] = useState(false)
+    const [selectedTaskDetail,setSelectedTaskDetail] = useState(null)
     
     const [pendingTasks, setPendingTasks] = useState([])
     const [inProgressTasks, setInProgressTasks] = useState([])
@@ -26,6 +30,8 @@ function TaskBoard() {
 
     const saveTimeout = useRef(null)
     const tasks = useOutletContext() ?? []
+
+    console.log("tasksToDisplay",tasks)
 
     const queryClient = useQueryClient()
 
@@ -58,6 +64,17 @@ function TaskBoard() {
       }
     })
 
+    const statusMutation = useMutation({
+      mutationKey:['task-status'],
+      mutationFn:({id,status})=>http.patch(`user/tasks/?id=${id}&status=${status}`),
+    })
+
+    // Change Status
+    const handleChangeStatus = (id,status) => {
+      statusMutation.mutate({id,status})
+      setOpenMenuId(null)
+    }
+
     // Edit task
     const handleEditTask = (task) => {
       console.log("Handle Edit Task Working",task)
@@ -68,15 +85,16 @@ function TaskBoard() {
     // Delete task
     const handleDeleteTask = (id) => {
       deleteMutation.mutate(id)
-      setOpenMenuId(false)
+      setOpenMenuId(null)
     }
 
+    // Reorder Position Save into DB
     const reorderedMutation = useMutation({
         mutationKey:["reorder-mutation"],
         mutationFn:(positions)=>http.patch('/tasks/reorder/',positions)
     })
 
-
+    // DRAG AND DROP
     const handleDragEnd = (event) => {
 
         const { active, over } = event
@@ -112,6 +130,27 @@ function TaskBoard() {
             return reordered
         })
     }
+
+
+    // COMMENT
+    const handleComments = async (id,comment) => {
+      try{
+          const res = await http.post(`tasks/comment/${id}`,{comment})
+          setTaskDetailDialog(false)
+      } catch(error){
+          console.log("ERR COMMENT:",error)
+      }
+    }
+
+
+    // TASK DETAILS
+    const handleTaskDetail = (task) => { 
+      console.log("Handle Task Details Starting",task) 
+          setSelectedTaskDetail(task)
+          setTaskDetailDialog(true)
+          setOpenMenuId(null)
+    } 
+
     
 
   return (
@@ -144,6 +183,8 @@ function TaskBoard() {
                           setOpenMenuId={setOpenMenuId}
                           handleEditTask={handleEditTask}
                           handleDeleteTask = {handleDeleteTask}
+                          handleChangeStatus={handleChangeStatus}
+                          handleTaskDetail={handleTaskDetail}
                       />
                   )): 
 
@@ -182,7 +223,10 @@ function TaskBoard() {
                 task={task} 
                 openMenuId={openMenuId}
                 setOpenMenuId={setOpenMenuId}
-                
+                handleEditTask={handleEditTask}
+                handleDeleteTask = {handleDeleteTask}
+                handleChangeStatus={handleChangeStatus}
+                handleTaskDetail={handleTaskDetail}
                 />
             )): 
 
@@ -217,6 +261,10 @@ function TaskBoard() {
                     task={task}
                     openMenuId={openMenuId}
                     setOpenMenuId={setOpenMenuId}
+                    handleEditTask={handleEditTask}
+                    handleDeleteTask = {handleDeleteTask}
+                    handleChangeStatus={handleChangeStatus}
+                    handleTaskDetail={handleTaskDetail}
                     
                 />
             )): 
@@ -239,6 +287,17 @@ function TaskBoard() {
         onClose={()=>setOpenEditTask(false)}
         />
       )}
+
+      {
+        openTaskDetail && (
+          <TaskDetail 
+            task = {selectedTaskDetail}
+            onClose = {()=>setTaskDetailDialog(false)}
+            handleComments = {handleComments}
+
+          />
+        )
+      }
     </section>
   )
 }
