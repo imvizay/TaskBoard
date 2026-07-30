@@ -9,11 +9,15 @@ export {api}
 api.interceptors.request.use(
     (config) => {
         if(!config.url.includes("/login/") && !config.url.includes("/signup/")){
+            const auth = JSON.parse(localStorage.getItem("taskboard_user"));
+
+        if (auth) {
             config.auth = {
-                username: "Anjani_Lashkari",
-                password: "vizay1999",
-          }
+                username: auth.username,
+                password: auth.password,
+            };
         }
+    }
         return config
     }
 )

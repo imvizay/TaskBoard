@@ -68,8 +68,12 @@ export default function LoginPage() {
         try{
             const res = await loginMutation.mutateAsync(loginCredential)
             const user = res.data.user
-            localStorage.setItem("taskboard_user",JSON.stringify(user))
-
+            localStorage.setItem("taskboard_user",JSON.stringify({
+                  username: user.username,
+                  password: password,
+                  is_admin:user.is_admin
+              })
+          )
             navigate('/task-dashboard')
         }
 
