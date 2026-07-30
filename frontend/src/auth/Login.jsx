@@ -70,7 +70,7 @@ export default function LoginPage() {
             const user = res.data.user
             localStorage.setItem("taskboard_user",JSON.stringify({
                   username: user.username,
-                  password: password,
+                  password: loginCredential.password,
                   is_admin:user.is_admin
               })
           )
